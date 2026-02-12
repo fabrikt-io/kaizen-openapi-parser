@@ -43,8 +43,8 @@ import com.reprezen.kaizen.oasparser.ovl3.OpenApi3Impl;
 public class SimpleSerializationTest extends Assert {
 
 	private static final String SPEC_REPO = "OAI/OpenAPI-Specification";
-	private static final String EXAMPLES_BRANCH = "master";
-	private static final String EXAMPLES_ROOT = "examples/v3.0";
+	private static final String EXAMPLES_BRANCH = "main";
+	private static final String EXAMPLES_ROOT = "_archive_/schemas/v3.0/pass";
 
 	private static ObjectMapper mapper = new ObjectMapper();
 	private static ObjectMapper yamlMapper = new YAMLMapper();
