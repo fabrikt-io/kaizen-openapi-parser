@@ -54,26 +54,24 @@ public class SimpleSerializationTest extends Assert {
 		@Parameters(name = "{index}: {1}")
 		public static Collection<Object[]> findExamples() throws IOException {
 			Collection<Object[]> examples = Lists.newArrayList();
-			Deque<URL> dirs = Queues.newArrayDeque();
-			String auth = System.getenv("GITHUB_AUTH") != null ? System.getenv("GITHUB_AUTH") + "@" : "";
-			String request = String.format("https://%sapi.github.com/repos/%s/contents/%s?ref=%s", auth, SPEC_REPO,
-					EXAMPLES_ROOT, EXAMPLES_BRANCH);
-			dirs.add(new URL(request));
-			while (!dirs.isEmpty()) {
-				URL url = dirs.remove();
-				JsonNode tree = new JsonLoader().load(url);
-				for (JsonNode result : iterable(tree.elements())) {
-					String type = result.get("type").asText();
-					String path = result.get("path").asText();
-					String resultUrl = result.get("url").asText();
-					if (type.equals("dir")) {
-						dirs.add(new URL(resultUrl));
-					} else if (type.equals("file") && (path.endsWith(".yaml") || path.endsWith(".json"))) {
-						String downloadUrl = result.get("download_url").asText();
-						examples.add(new Object[] { new URL(downloadUrl), result.get("name").asText() });
-					}
+			
+			// Use local test resources instead of downloading from GitHub
+			String[] exampleFiles = {
+				"api-with-examples.yaml",
+				"callback-example.yaml",
+				"link-example.yaml",
+				"petstore-expanded.yaml",
+				"petstore.yaml",
+				"uspto.yaml"
+			};
+			
+			for (String fileName : exampleFiles) {
+				URL fileUrl = SimpleSerializationTest.class.getResource("/openapi-examples/" + fileName);
+				if (fileUrl != null) {
+					examples.add(new Object[] { fileUrl, fileName });
 				}
 			}
+			
 			return examples;
 		}
 
