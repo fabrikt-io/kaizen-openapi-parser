@@ -89,31 +89,27 @@ publishing {
                 
                 developers {
                     developer {
-                        id.set("fabrikt-maintainers")
-                        name.set("Fabrikt Maintainers")
+                        id.set("cjbooms")
+                        name.set("Conor Gallagher")
+                        email.set("cjbooms@gmail.com")
                         organization.set("Fabrikt")
-                        organizationUrl.set("https://github.com/fabrikt-io/fabrikt")
+                        organizationUrl.set("https://github.com/fabrikt-io")
                     }
+                    // Original authors from RepreZen
                     developer {
                         id.set("andylowry")
                         name.set("Andy Lowry")
-                        email.set("andy.lowry@reprezen.com")
                         organization.set("RepreZen")
-                        organizationUrl.set("https://www.reprezen.com")
                     }
                     developer {
                         id.set("ghillairet")
                         name.set("Guillaume Hillairet")
-                        email.set("g.hillairet@gmail.com")
                         organization.set("RepreZen")
-                        organizationUrl.set("https://www.reprezen.com")
                     }
                     developer {
                         id.set("tfesenko")
                         name.set("Tatiana Fesenko")
-                        email.set("tatiana.fesenko@reprezen.com")
                         organization.set("RepreZen")
-                        organizationUrl.set("https://www.reprezen.com")
                     }
                 }
                 
