@@ -1,0 +1,131 @@
+plugins {
+    `java-library`
+    `maven-publish`
+    signing
+    id("com.palantir.git-version") version "3.0.0"
+}
+
+group = "io.fabrikt"
+val gitVersion: groovy.lang.Closure<*> by extra
+version = gitVersion.call()
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+val jacksonVersion = "2.9.8"
+val jsonOverlayVersion = "4.0.4"
+
+dependencies {
+    // Main dependencies
+    implementation("com.reprezen.jsonoverlay:jsonoverlay:$jsonOverlayVersion") {
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "commons-cli", module = "commons-cli")
+        exclude(group = "com.github.javaparser", module = "javaparser-core")
+        exclude(group = "org.eclipse.xtend", module = "org.eclipse.xtend.lib")
+    }
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+    implementation("javax.mail:javax.mail-api:1.6.1")
+    implementation("com.sun.mail:javax.mail:1.6.1")
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
+
+    // Test dependencies
+    testImplementation("junit:junit:4.12")
+    testImplementation("com.google.guava:guava:19.0")
+    testImplementation("org.skyscreamer:jsonassert:1.5.0")
+    testImplementation("org.apache.commons:commons-lang3:3.7")
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType<Javadoc> {
+    options.encoding = "UTF-8"
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+}
+
+tasks.test {
+    useJUnit()
+}
+
+// Publishing configuration (based on fabrikt)
+publishing {
+    repositories {
+        maven {
+            name = "ossrh-staging-api"
+            url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/")
+            credentials {
+                username = System.getenv("OSSRH_USER_TOKEN_USERNAME")
+                password = System.getenv("OSSRH_USER_TOKEN_PASSWORD")
+            }
+        }
+    }
+
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+
+            pom {
+                name.set("KaiZen OpenAPI Parser")
+                description.set("KaiZen OpenAPI Parser - Maintained by Fabrikt (originally by RepreZen)")
+                url.set("https://github.com/fabrikt-io/kaizen-openapi-parser")
+                inceptionYear.set("2017")
+                
+                licenses {
+                    license {
+                        name.set("Eclipse Public License - Version 1.0")
+                        url.set("https://www.eclipse.org/legal/epl-v10.html")
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id.set("cjbooms")
+                        name.set("Conor Gallagher")
+                        email.set("cjbooms@gmail.com")
+                        organization.set("Fabrikt")
+                        organizationUrl.set("https://github.com/fabrikt-io")
+                    }
+                    // Original authors from RepreZen
+                    developer {
+                        id.set("andylowry")
+                        name.set("Andy Lowry")
+                        organization.set("RepreZen")
+                    }
+                    developer {
+                        id.set("ghillairet")
+                        name.set("Guillaume Hillairet")
+                        organization.set("RepreZen")
+                    }
+                    developer {
+                        id.set("tfesenko")
+                        name.set("Tatiana Fesenko")
+                        organization.set("RepreZen")
+                    }
+                }
+                
+                scm {
+                    connection.set("scm:git:git://github.com/fabrikt-io/kaizen-openapi-parser.git")
+                    developerConnection.set("scm:git:git@github.com:fabrikt-io/kaizen-openapi-parser.git")
+                    url.set("https://github.com/fabrikt-io/kaizen-openapi-parser/tree/main")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    val signingKey: String? by project
+    val signingPassword: String? by project
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["maven"])
+}

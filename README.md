@@ -148,9 +148,14 @@ This fork is published to Maven Central under:
 ```xml
 <dependency>
     <groupId>io.fabrikt</groupId>
-    <artifactId>openapi-parser</artifactId>
-    <version>4.0.5</version>
+    <artifactId>kaizen-openapi-parser</artifactId>
+    <version>4.1.0</version>
 </dependency>
+```
+
+Or in Gradle:
+```kotlin
+implementation("io.fabrikt:kaizen-openapi-parser:4.1.0")
 ```
 
 ## Resources
