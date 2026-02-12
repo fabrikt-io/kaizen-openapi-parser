@@ -5,12 +5,12 @@
 	ModelSolv, Inc. - initial API and implementation and/or initial documentation -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.reprezen.kaizen</groupId>
+	<groupId>io.fabrikt</groupId>
 	<artifactId>openapi-parser</artifactId>
 	<version>4.0.5-SNAPSHOT</version>
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>KaiZen OpenAPI Parser by RepreZen</description>
-	<url>https://github.com/RepreZen/KaiZen-OpenAPI-Parser</url>
+	<description>KaiZen OpenAPI Parser - Maintained by Fabrikt (originally by RepreZen)</description>
+	<url>https://github.com/fabrikt-io/kaizen-openapi-parser</url>
 	<licenses>
 		<license>
 			<name>Eclipse Public License - Version 1.0</name>
@@ -18,6 +18,12 @@
 		</license>
 	</licenses>
 	<developers>
+		<developer>
+			<name>Fabrikt Maintainers</name>
+			<organization>Fabrikt</organization>
+			<organizationUrl>https://github.com/cjbooms/fabrikt</organizationUrl>
+		</developer>
+		<!-- Original developers from RepreZen -->
 		<developer>
 			<name>Andy Lowry</name>
 			<email>andy.lowry@reprezen.com</email>
@@ -38,9 +44,9 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:git://github.com/RepreZen/KaiZen-OpenAPI-Parser.git</connection>
-		<developerConnection>scm:git:git@github.com:RepreZen/KaiZen-OpenAPI-Parser.git</developerConnection>
-		<url>https://github.com/RepreZen/KaiZen-OpenAPI-Parser/tree/master</url>
+		<connection>scm:git:git://github.com/fabrikt-io/kaizen-openapi-parser.git</connection>
+		<developerConnection>scm:git:git@github.com:fabrikt-io/kaizen-openapi-parser.git</developerConnection>
+		<url>https://github.com/fabrikt-io/kaizen-openapi-parser/tree/main</url>
 		<tag>HEAD</tag>
 	</scm>
 	<dependencies>
