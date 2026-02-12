@@ -1,6 +1,6 @@
 # KaiZen OpenAPI Parser
 
-> **Note:** This is a fork maintained by [Fabrikt](https://github.com/cjbooms/fabrikt) for continued development and maintenance. The original project by [RepreZen](https://github.com/RepreZen/KaiZen-OpenApi-Parser) appears to be unmaintained. We are grateful to the original authors for their excellent work on this parser, which is a critical dependency of the Fabrikt OpenAPI code generator.
+> **Note:** This is a fork maintained by [Fabrikt](https://github.com/fabrikt-io/fabrikt) for continued development and maintenance. The original project by [RepreZen](https://github.com/RepreZen/KaiZen-OpenApi-Parser) appears to be unmaintained. We are grateful to the original authors for their excellent work on this parser, which is a critical dependency of the Fabrikt OpenAPI code generator.
 >
 > This fork is published under the `io.fabrikt` groupId to Maven Central. We maintain backward compatibility while providing necessary updates and fixes.
 
