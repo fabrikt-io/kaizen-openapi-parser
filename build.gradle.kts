@@ -2,10 +2,12 @@ plugins {
     `java-library`
     `maven-publish`
     signing
+    id("com.palantir.git-version") version "3.0.0"
 }
 
 group = "io.fabrikt"
-version = "4.0.5-SNAPSHOT"
+val gitVersion: groovy.lang.Closure<*> by extra
+version = gitVersion.call()
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
