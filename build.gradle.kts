@@ -23,6 +23,11 @@ repositories {
 val jacksonVersion = "2.9.8"
 val jsonOverlayVersion = "4.0.4"
 
+val codeGeneration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
 dependencies {
     // Main dependencies
     implementation("com.reprezen.jsonoverlay:jsonoverlay:$jsonOverlayVersion") {
@@ -36,6 +41,12 @@ dependencies {
     implementation("javax.mail:javax.mail-api:1.6.1")
     implementation("com.sun.mail:javax.mail:1.6.1")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
+
+    // Dependencies used by JsonOverlay only while generating model sources
+    codeGeneration("com.google.guava:guava:19.0")
+    codeGeneration("commons-cli:commons-cli:1.4")
+    codeGeneration("com.github.javaparser:javaparser-core:3.5.7")
+    codeGeneration("org.eclipse.xtend:org.eclipse.xtend.lib:2.11.0")
 
     // Test dependencies
     testImplementation("junit:junit:4.12")
@@ -55,6 +66,140 @@ tasks.withType<Javadoc> {
 
 tasks.test {
     useJUnit()
+}
+
+val openApi3PackageDirectory = layout.projectDirectory.dir("src/main/java/com/reprezen/kaizen/oasparser")
+val openApi3TypeDefinition = openApi3PackageDirectory.file("types3.yaml")
+val openApi3GeneratedSources = fileTree(openApi3PackageDirectory) {
+    include("model3/**/*.java", "ovl3/**/*.java")
+}
+
+fun File.normalizedGeneratedJava(): String {
+    val sourceWithoutImports = readLines()
+        .filterNot { it.trimStart().startsWith("import ") }
+        .joinToString("\n")
+    var quotedBy: Char? = null
+    var escaped = false
+
+    return buildString {
+        sourceWithoutImports.forEach { character ->
+            when {
+                quotedBy == null && (character == '"' || character == '\'') -> {
+                    quotedBy = character
+                    append(character)
+                }
+                quotedBy != null -> {
+                    append(character)
+                    when {
+                        escaped -> escaped = false
+                        character == '\\' -> escaped = true
+                        character == quotedBy -> quotedBy = null
+                    }
+                }
+                !character.isWhitespace() -> append(character)
+            }
+        }
+    }
+}
+
+fun File.externalImports(): Set<String> = readLines()
+    .map { it.trim() }
+    .filter { it.startsWith("import ") }
+    .map { it.removePrefix("import ").removeSuffix(";") }
+    .filterNot { it.startsWith("com.reprezen.kaizen.oasparser.model3.") }
+    .filterNot { it.startsWith("com.reprezen.kaizen.oasparser.ovl3.") }
+    .toSet()
+
+val verificationPackageDirectory = layout.buildDirectory.dir("openapi3-codegen-verification/com/reprezen/kaizen/oasparser")
+
+val generateOpenApi3InTemporaryDirectory by tasks.registering(JavaExec::class) {
+    dependsOn(tasks.classes)
+    classpath = sourceSets.main.get().runtimeClasspath + codeGeneration
+    mainClass.set("com.reprezen.kaizen.oasparser.GenOpenApi3")
+    workingDir = projectDir
+    inputs.file(openApi3TypeDefinition)
+    inputs.files(openApi3GeneratedSources)
+    outputs.dir(verificationPackageDirectory)
+
+    doFirst {
+        val destination = verificationPackageDirectory.get().asFile
+        delete(destination)
+        copy {
+            from(openApi3PackageDirectory)
+            include("model3/**/*.java", "ovl3/**/*.java")
+            into(destination)
+        }
+        setArgs(listOf(destination.absolutePath))
+    }
+}
+
+val generateOpenApi3 by tasks.registering {
+    group = "code generation"
+    description = "Regenerates structurally changed OpenAPI 3 model sources from types3.yaml."
+    dependsOn(generateOpenApi3InTemporaryDirectory)
+
+    doLast {
+        val destinationRoot = openApi3PackageDirectory.asFile
+        val generatedRoot = verificationPackageDirectory.get().asFile
+        val updated = fileTree(generatedRoot) {
+            include("model3/**/*.java", "ovl3/**/*.java")
+        }.files.mapNotNull { generatedFile ->
+            val relativePath = generatedFile.relativeTo(generatedRoot).invariantSeparatorsPath
+            val destinationFile = destinationRoot.resolve(relativePath)
+            if (!destinationFile.exists() ||
+                destinationFile.normalizedGeneratedJava() != generatedFile.normalizedGeneratedJava()
+            ) {
+                generatedFile.copyTo(destinationFile, overwrite = true)
+                relativePath
+            } else {
+                null
+            }
+        }
+
+        if (updated.isEmpty()) {
+            logger.lifecycle("The committed OpenAPI 3 model sources are already up to date.")
+        } else {
+            logger.lifecycle("Updated OpenAPI 3 model sources: ${updated.sorted().joinToString()}")
+        }
+    }
+}
+
+val verifyGeneratedOpenApi3 by tasks.registering {
+    group = "verification"
+    description = "Checks that the committed OpenAPI 3 model structure matches types3.yaml."
+    dependsOn(generateOpenApi3InTemporaryDirectory)
+
+    doLast {
+        val expectedRoot = openApi3PackageDirectory.asFile
+        val actualRoot = verificationPackageDirectory.get().asFile
+        val expectedFiles = openApi3GeneratedSources.files.associateBy { it.relativeTo(expectedRoot).invariantSeparatorsPath }
+        val actualFiles = fileTree(actualRoot) {
+            include("model3/**/*.java", "ovl3/**/*.java")
+        }.files.associateBy { it.relativeTo(actualRoot).invariantSeparatorsPath }
+
+        val missing = expectedFiles.keys - actualFiles.keys
+        val unexpected = actualFiles.keys - expectedFiles.keys
+        val changed = expectedFiles.keys.intersect(actualFiles.keys).filterNot { relativePath ->
+            val expected = expectedFiles.getValue(relativePath)
+            val actual = actualFiles.getValue(relativePath)
+            expected.normalizedGeneratedJava() == actual.normalizedGeneratedJava() &&
+                actual.externalImports().containsAll(expected.externalImports())
+        }
+
+        check(missing.isEmpty() && unexpected.isEmpty() && changed.isEmpty()) {
+            buildString {
+                appendLine("Generated OpenAPI 3 model source structure is out of date.")
+                if (missing.isNotEmpty()) appendLine("Missing: ${missing.sorted().joinToString()}")
+                if (unexpected.isNotEmpty()) appendLine("Unexpected: ${unexpected.sorted().joinToString()}")
+                if (changed.isNotEmpty()) appendLine("Changed: ${changed.sorted().joinToString()}")
+                append("Run ./gradlew generateOpenApi3 and commit the resulting changes.")
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(verifyGeneratedOpenApi3)
 }
 
 // Publishing configuration (based on fabrikt)

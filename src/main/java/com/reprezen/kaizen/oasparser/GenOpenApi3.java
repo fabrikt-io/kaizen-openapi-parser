@@ -14,10 +14,11 @@ import com.reprezen.jsonoverlay.gen.CodeGenerator;
 
 public class GenOpenApi3 {
 	public static void main(String[] args) throws Exception {
+		String destination = args.length == 0 ? "src/main/java/com/reprezen/kaizen/oasparser" : args[0];
 		CodeGenerator.main(new String[] { //
 				"-t", "src/main/java/com/reprezen/kaizen/oasparser/types3.yaml", //
 				"-p", "com.reprezen.kaizen.oasparser", //
-				"-d", "src/main/java/com/reprezen/kaizen/oasparser", //
+				"-d", destination, //
 				"-i", "model3", //
 				"-I", "model3", //
 				"-c", "ovl3", //

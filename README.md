@@ -141,6 +141,16 @@ Contributions are welcome! Please open an issue or pull request on GitHub.
 
 For questions or discussions about this fork, please open an issue at: https://github.com/fabrikt-io/kaizen-openapi-parser
 
+### Regenerating the OpenAPI 3 model
+
+The interfaces in `oasparser.model3` and their implementations in `oasparser.ovl3` are generated from `types3.yaml`. Regenerate them after changing the type definition:
+
+```shell
+./gradlew generateOpenApi3
+```
+
+The regular `check` task runs `verifyGeneratedOpenApi3`, which regenerates the model in a temporary directory and verifies that its structure matches the committed sources. Formatting and import layout are normalized during this comparison because JsonOverlay rewrites them independently of model structure.
+
 ## Maven Coordinates
 
 This fork is published to Maven Central under:
