@@ -20,8 +20,9 @@ repositories {
     mavenCentral()
 }
 
-val jacksonVersion = "2.9.8"
+val jacksonVersion = "2.18.10"
 val jsonOverlayVersion = "4.0.4"
+val guavaVersion = "32.0.1-jre"
 
 val codeGeneration by configurations.creating {
     isCanBeConsumed = false
@@ -43,16 +44,16 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     // Dependencies used by JsonOverlay only while generating model sources
-    codeGeneration("com.google.guava:guava:19.0")
+    codeGeneration("com.google.guava:guava:$guavaVersion")
     codeGeneration("commons-cli:commons-cli:1.4")
     codeGeneration("com.github.javaparser:javaparser-core:3.5.7")
     codeGeneration("org.eclipse.xtend:org.eclipse.xtend.lib:2.11.0")
 
     // Test dependencies
-    testImplementation("junit:junit:4.12")
-    testImplementation("com.google.guava:guava:19.0")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("com.google.guava:guava:$guavaVersion")
     testImplementation("org.skyscreamer:jsonassert:1.5.0")
-    testImplementation("org.apache.commons:commons-lang3:3.7")
+    testImplementation("org.apache.commons:commons-lang3:3.18.0")
 }
 
 tasks.withType<JavaCompile> {
