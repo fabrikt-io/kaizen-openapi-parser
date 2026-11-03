@@ -39,8 +39,7 @@ dependencies {
     }
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
-    implementation("javax.mail:javax.mail-api:1.6.1")
-    implementation("com.sun.mail:javax.mail:1.6.1")
+    implementation("com.sun.mail:mailapi:1.6.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     // Dependencies used by JsonOverlay only while generating model sources
